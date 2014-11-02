@@ -1,205 +1,232 @@
-"""Recommendation"""
-
-from math import sqrt
-
 # A dictionary of movie critics and their ratings of a small
 # set of movies
 critics = {
-    'Lisa Rose': {'Lady in the Water': 2.5, 'Snakes on a Plane': 3.5,
-                  'Just My Luck': 3.0, 'Superman Returns': 3.5,
-                  'You, Me and Dupree': 2.5,
-                  'The Night Listener': 3.0},
-    'Gene Seymour': {'Lady in the Water': 3.0, 'Snakes on a Plane': 3.5,
-                     'Just My Luck': 1.5, 'Superman Returns': 5.0,
-                     'The Night Listener': 3.0,
-                     'You, Me and Dupree': 3.5},
-    'Michael Phillips': {'Lady in the Water': 2.5, 'Snakes on a Plane': 3.0,
-                         'Superman Returns': 3.5, 'The Night Listener': 4.0},
-    'Claudia Puig': {'Snakes on a Plane': 3.5, 'Just My Luck': 3.0,
-                     'The Night Listener': 4.5, 'Superman Returns': 4.0,
-                     'You, Me and Dupree': 2.5},
-    'Mick LaSalle': {'Lady in the Water': 3.0, 'Snakes on a Plane': 4.0,
-                     'Just My Luck': 2.0, 'Superman Returns': 3.0,
-                     'The Night Listener': 3.0,
-                     'You, Me and Dupree': 2.0},
-    'Jack Matthews': {'Lady in the Water': 3.0, 'Snakes on a Plane': 4.0,
-                      'The Night Listener': 3.0, 'Superman Returns': 5.0,
-                      'You, Me and Dupree': 3.5},
-    'Toby': {'Snakes on a Plane': 4.5, 'You, Me and Dupree': 1.0,
-             'Superman Returns': 4.0},
-    'Ashwath': {'Snakes on a Plane': 3.5, 'Superman Returns': 2.0},
-}
+    'Lisa Rose': {
+        'Lady in the Water': 2.5,
+        'Snakes on a Plane': 3.5,
+        'Just My Luck': 3.0,
+        'Superman Returns': 3.5,
+        'You, Me and Dupree': 2.5,
+        'The Night Listener': 3.0},
+    'Gene Seymour': {
+        'Lady in the Water': 3.0,
+        'Snakes on a Plane': 3.5,
+        'Just My Luck': 1.5,
+        'Superman Returns': 5.0,
+        'The Night Listener': 3.0,
+        'You, Me and Dupree': 3.5},
+    'Michael Phillips': {
+        'Lady in the Water': 2.5,
+        'Snakes on a Plane': 3.0,
+        'Superman Returns': 3.5,
+        'The Night Listener': 4.0},
+    'Claudia Puig': {
+        'Snakes on a Plane': 3.5,
+        'Just My Luck': 3.0,
+        'The Night Listener': 4.5,
+        'Superman Returns': 4.0,
+        'You, Me and Dupree': 2.5},
+    'Mick LaSalle': {
+        'Lady in the Water': 3.0,
+        'Snakes on a Plane': 4.0,
+        'Just My Luck': 2.0,
+        'Superman Returns': 3.0,
+        'The Night Listener': 3.0,
+        'You, Me and Dupree': 2.0},
+    'Jack Matthews': {
+        'Lady in the Water': 3.0,
+        'Snakes on a Plane': 4.0,
+        'The Night Listener': 3.0,
+        'Superman Returns': 5.0,
+        'You, Me and Dupree': 3.5},
+    'Toby': {
+        'Snakes on a Plane': 4.5,
+        'You, Me and Dupree': 1.0,
+        'Superman Returns': 4.0}}
+
+
+from math import sqrt
 
 
 # Returns a distance-based similarity score for person1 and person2
 def sim_distance(prefs, person1, person2):
-    # Get the list of shared items
+    # Get the list of shared_items
     si = {}
     for item in prefs[person1]:
         if item in prefs[person2]:
             si[item] = 1
 
-    # If they have no rating in common, return 0
+    # if they have no ratings in common, return 0
     if len(si) == 0:
         return 0
 
-    # Add up the square of all the differences
+    # Add up the squares of all the differences
     sum_of_squares = sum([pow(prefs[person1][item] - prefs[person2][item], 2)
-                          for item in prefs[person1]
-                          if item in prefs[person2]])
+                          for item in prefs[person1] if item in prefs[person2]])
 
     return 1 / (1 + sum_of_squares)
 
 
-# Returns the pearson correlation coefficient for person1 and person2
-def sim_pearson(prefs, person1, person2):
-    # Get the list of shared items
+# Returns the Pearson correlation coefficient for p1 and p2
+def sim_pearson(prefs, p1, p2):
+    # Get the list of mutually rated items
     si = {}
-    for item in prefs[person1]:
-        if item in prefs[person2]:
+    for item in prefs[p1]:
+        if item in prefs[p2]:
             si[item] = 1
 
-    # If they have no rating in common, return 0
+    # if they are no ratings in common, return 0
     if len(si) == 0:
         return 0
 
+    # Sum calculations
     n = len(si)
 
-    # Add up all the preferences
-    sum1 = sum([prefs[person1][item] for item in si])
-    sum2 = sum([prefs[person2][item] for item in si])
+    # Sums of all the preferences
+    sum1 = sum([prefs[p1][it] for it in si])
+    sum2 = sum([prefs[p2][it] for it in si])
 
-    # Sum up the squares
-    sum1_square = sum([pow(prefs[person1][item], 2) for item in si])
-    sum2_square = sum([pow(prefs[person2][item], 2) for item in si])
+    # Sums of the squares
+    sum1Sq = sum([pow(prefs[p1][it], 2) for it in si])
+    sum2Sq = sum([pow(prefs[p2][it], 2) for it in si])
 
-    # Sum up the products
-    product_sum = sum([prefs[person1][item] * prefs[person2][item]
-                       for item in si])
+    # Sum of the products
+    pSum = sum([prefs[p1][it] * prefs[p2][it] for it in si])
 
-    # Calculate the Pearson score
-    num = product_sum - (sum1 * sum2 / n)
-    den = sqrt((sum1_square - pow(sum1, 2) / n) *
-               (sum2_square - pow(sum2, 2) / n))
-
+    # Calculate r (Pearson score)
+    num = pSum - (sum1 * sum2 / n)
+    den = sqrt((sum1Sq - pow(sum1, 2) / n) * (sum2Sq - pow(sum2, 2) / n))
     if den == 0:
         return 0
 
-    return num / den
+    r = num / den
+
+    return r
 
 
-# Returns the best matches for the person from the prefs dictionary.
+# Returns the best matches for person from the prefs dictionary.
 # Number of results and similarity function are optional params.
-def top_matches(prefs, person, n=5, similarity=sim_pearson):
-    scores = [(similarity(prefs, person, other), other)
-              for other in prefs if other != person]
-
-    # sort the list so the heighest scores appear at the top
-    scores.sort(reverse=True)
-
-    return scores[:n]
+def topMatches(prefs, person, n=5, similarity=sim_pearson):
+    scores = sorted([(similarity(prefs, person, other), other)
+                     for other in prefs if other != person])
+    scores.reverse()
+    return scores[0:n]
 
 
-# Gets recommendation for a person by using a weighted average
+# Gets recommendations for a person by using a weighted average
 # of every other user's rankings
-def get_recommendations(prefs, person, simalirity=sim_pearson):
+def getRecommendations(prefs, person, similarity=sim_pearson):
     totals = {}
-    sim_sums = {}
+    simSums = {}
     for other in prefs:
         # don't compare me to myself
         if other == person:
             continue
-        sim = simalirity(prefs, person, other)
+        sim = similarity(prefs, person, other)
 
         # ignore scores of zero or lower
         if sim <= 0:
             continue
         for item in prefs[other]:
+
             # only score movies I haven't seen yet
             if item not in prefs[person] or prefs[person][item] == 0:
-                # similarity * score
+                # Similarity * Score
                 totals.setdefault(item, 0)
                 totals[item] += prefs[other][item] * sim
-                # sum of similarities
-                sim_sums.setdefault(item, 0)
-                sim_sums[item] += sim
+                # Sum of similarities
+                simSums.setdefault(item, 0)
+                simSums[item] += sim
 
-    # create the normalized list
-    rankings = [(total / sim_sums[item], item)
-                for item, total in totals.items()]
+    # Create the normalized list
+    rankings = sorted([(total / simSums[item], item)
+                       for item, total in list(totals.items())])
 
-    # return the sorted list
-    rankings.sort(reverse=True)
-
+    # Return the sorted list
+    rankings.reverse()
     return rankings
 
 
-# transform dictionary
-def transform_prefs(prefs):
+def transformPrefs(prefs):
     result = {}
     for person in prefs:
         for item in prefs[person]:
             result.setdefault(item, {})
 
-            # flip item and person
+            # Flip item and person
             result[item][person] = prefs[person][item]
-
     return result
 
 
-# Item similarity calculate
-def calculate_similar_items(prefs, n=10):
-    # create a dictionary of item showing which other items the are
-    # most similar to.
+def calculateSimilarItems(prefs, n=10):
+    # Create a dictionary of items showing which other items they
+    # are most similar to.
     result = {}
-
-    # invert the preference matrix to be item-centric
-    item_prefs = transform_prefs(prefs)
-
+    # Invert the preference matrix to be item-centric
+    itemPrefs = transformPrefs(prefs)
     c = 0
-    for item in item_prefs:
-        # status updates for large datasets
+    for item in itemPrefs:
+        # Status updates for large datasets
         c += 1
         if c % 100 == 0:
-            print("%d / %d" % (c, len(item_prefs)))
-        # find the most similar items to this one
-        scores = top_matches(item_prefs, item, n=n, similarity=sim_distance)
+            print("%d / %d" % (c, len(itemPrefs)))
+        # Find the most similar items to this one
+        scores = topMatches(itemPrefs, item, n=n, similarity=sim_distance)
         result[item] = scores
-        return result
+    return result
 
 
-if __name__ == '__main__':
+def getRecommendedItems(prefs, itemMatch, user):
+    userRatings = prefs[user]
+    scores = {}
+    totalSim = {}
+    # Loop over items rated by this user
+    for (item, rating) in list(userRatings.items()):
 
-    from itertools import combinations
+        # Loop over items similar to this one
+        for (similarity, item2) in itemMatch[item]:
 
-    print("simalirity between users")
-    print("=" * 100)
-    users = [user for user in critics.keys()]
-    print("{:20} {:20} {:20} {:20}".format(
-        '', '', 'Euclidean distance', 'Pearson distance'))
-    print("=" * 100)
-    for person1, person2 in combinations(users, 2):
-        print("{:20} {:20} {:<20} {:<20}".format(
-            person1, person2,
-            sim_distance(critics, person1, person2),
-            sim_pearson(critics, person1, person2)))
+            # Ignore if this user has already rated this item
+            if item2 in userRatings:
+                continue
+            # Weighted sum of rating times similarity
+            scores.setdefault(item2, 0)
+            scores[item2] += similarity * rating
+            # Sum of all the similarities
+            totalSim.setdefault(item2, 0)
+            totalSim[item2] += similarity
 
-    print()
-    print()
-    print("simalirity between movies")
-    print("=" * 100)
-    movies = [movie for movie in transform_prefs(critics).keys()]
-    print("{:20} {:20} {:20} {:20}".format(
-        '', '', 'Euclidean distance', 'Pearson distance'))
-    print("=" * 100)
-    for person1, person2 in combinations(movies, 2):
-        print("{:20} {:20} {:<20} {:<20}".format(
-            person1, person2,
-            sim_distance(transform_prefs(critics), person1, person2),
-            sim_pearson(transform_prefs(critics), person1, person2)))
+    # Divide each total score by total weighting to get an average
+    rankings = sorted([(score / totalSim[item], item)
+                       for item, score in list(scores.items())])
 
-    print()
-    print()
-    print("similar items")
-    print("=" * 100)
-    calculate_similar_items(critics)
+    # Return the rankings from highest to lowest
+    rankings.reverse()
+    return rankings
+
+
+def loadMovieLens(path='/data/ml-100k'):
+    # Get movie titles
+    import os
+    pwd = os.getcwd()
+    movies = {}
+    for line in open(pwd + path + '/u.item'):
+        (id, title) = line.split('|')[0:2]
+        movies[id] = title
+
+    # Load data
+    prefs = {}
+    for line in open(pwd + path + '/u.data'):
+        (user, movieid, rating, ts) = line.split('\t')
+        prefs.setdefault(user, {})
+        prefs[user][movies[movieid]] = float(rating)
+    return prefs
+
+
+from itertools import combinations
+
+
+def iter_function(function):
+
+    for p1, p2 in combinations(critics.keys(), 2):
+        print("{:20}{:20}{:<20}".format(p1, p2, function(critics, p1, p2)))
